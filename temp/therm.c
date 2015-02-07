@@ -116,13 +116,13 @@ reading_t * thermRead(char *location)
 
 float thermCelcius(reading_t *raw)
 {
-	float c = raw->temperature / 1000;
-	return c;
+	float c = (float) raw->temperature;
+	return c / 1000; //move three decimal places to the right
 }
 
 float thermFarenheit(reading_t *raw)
 {
-	int c = raw->temperature;
-	float f = (((c * 9) / 5) + 32) / 1000;
-	return f;
+	float c = (float) raw->temperature;
+	c = c / 1000; // move three decimal places to the right
+	return ((c * 9) / 5) + 32;
 }
