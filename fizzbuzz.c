@@ -15,6 +15,7 @@ int main (void)
 	printf("Raspberry Pi Blinking...\n");
 
 	pinMode(LED_1, OUTPUT);
+	pinMode(LED_2, OUTPUT);
 
 	for(int i = 0; i < 250; i++) {
 		if (i % 3 == 0 && i % 5 == 0) {
