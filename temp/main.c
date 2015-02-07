@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <wiringPi.h>
 
 #include "therm.h"
@@ -34,6 +35,14 @@ void cleanUp()
 	digitalWrite(LED_2, LOW);
 }
 
+/* Only really have this because signal needs a function to call */
+void cleanUpAndExit()
+{
+	printf("Exiting...\n");
+	cleanUp();
+	exit(0);
+}
+
 int main(void)
 {
 	if (setUp() == FALSE) {
@@ -41,33 +50,37 @@ int main(void)
 		return 1;
 	}
 
-	digitalWrite(LED_1, HIGH); // light this LED to show the program is running.
+	/* Handles ctrl+c so we get cleanup, and importantly switch off the
+	   "running" LED */
+    signal(SIGINT, cleanUpAndExit);
+
+	/* light this LED to show the program is running. */
+	digitalWrite(LED_1, HIGH);
 
 	float degrees_c;
-	float degrees_f;
 
 	for(;;) {
-		// flash the working LED to show that we're taking a temp and doing something with it
+		/* flash the working LED to show that we're
+		   taking a temp and doing some work */
 		digitalWrite(LED_2, HIGH);
 
 		reading_t *raw = thermRead(THERM_LOCATION);
 		if (raw == NULL) {
-			//something is fucky
+			// what a state, failed malloc or something probably
 			printf("Failed to read from the sensor\n");
 			cleanUp();
 			return 1;
 		}
 
 		degrees_c = thermCelcius(raw);
-		degrees_f = thermFarenheit(raw);
 
 		// probably write to a file or something here...
-		printf("current reading is: %2.3fC, %2.3fF\n", degrees_c, degrees_f);
+		printf("%s: %2.0fC\n", raw->identifier, degrees_c);
 
 		digitalWrite(LED_2, LOW);
 		delay(10000);
 	}
 
-	cleanUp();
+	cleanUpAndExit();
 	return 0;
 }

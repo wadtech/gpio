@@ -1,6 +1,4 @@
-/**
- * Usage implies the DS18B20 sensor with w1-therm
- */
+/* Usage implies the DS18B20 sensor with w1-therm */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -91,10 +89,8 @@ reading_t * thermRead(char *location)
 		return FALSE;
 	}
 
-	/*
-		if the first line contains YES, then there will be a second line
-		with an identifier and a reading in it
-	 */
+	/* if the first line contains YES, then there will be a second line
+	   with an identifier and a reading in it */
 	char success_line[MAX_BUFLEN];
 	fgets(success_line, sizeof(success_line), fp);
 
