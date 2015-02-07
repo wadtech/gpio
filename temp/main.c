@@ -66,7 +66,7 @@ int main(void)
 
 		reading_t *raw = thermRead(THERM_LOCATION);
 		if (raw == NULL) {
-			// what a state, failed malloc or something probably
+			/* what a state, failed malloc or something probably */
 			printf("Failed to read from the sensor\n");
 			cleanUp();
 			return 1;
@@ -74,8 +74,8 @@ int main(void)
 
 		degrees_c = thermCelcius(raw);
 
-		// probably write to a file or something here...
-		printf("%s: %2.0fC\n", raw->identifier, degrees_c);
+		/* probably write to a file or something here... */
+		printf("%2.0fC\n", degrees_c);
 
 		digitalWrite(LED_2, LOW);
 		delay(10000);

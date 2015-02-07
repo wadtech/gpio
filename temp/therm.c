@@ -1,4 +1,16 @@
-/* Usage implies the DS18B20 sensor with w1-therm */
+/* Usage implies the DS18B20 sensor with w1-therm
+
+	modprobe w1-gpio
+	modprobe w1-therm
+
+ 	cat /sys/bus/w1/devices/28-<serial>/w1_slave
+		5b 01 55 00 7f ff 0c 10 3a : crc=3a YES
+		5b 01 55 00 7f ff 0c 10 3a t=21687
+
+	if the first line ends in YES then the second line will contain
+	the temperature reading.
+
+	The user of this code must provide the location to the w1_slave file */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,9 +23,12 @@
 #define NOT_FOUND -1
 
 #define MAX_BUFLEN 120
-#define IDENTIFIER_SIZE 26
+/* so arbitrary, it's a hex value with spaces between each pair.
+   i.e. FF FF FF FF FF FF FF FF FF  */
+#define IDENTIFIER_LEN 26
 
-#define TEMP_LEN 5
+/* more magic numbers, the temperature is 5 characters long from the sensor */
+#define TEMPERATURE_LEN 5
 #define BAD_READING -999 /* out-of-range for the sensor */
 
 /* pinched from SO http://stackoverflow.com/a/7655509/771564 */
@@ -27,23 +42,14 @@ int strpos(char *haystack, char *needle)
    return NOT_FOUND;
 }
 
-char * removeNewline(char *string_with_newline)
+int removeNewline(char *string_with_newline)
 {
 	char *pos;
 	if ((pos = strchr(string_with_newline, '\n')) != NULL) {
 	    *pos = '\0';
 	}
 
-	return string_with_newline;
-}
-
-char * extractIdentifier(char *str_with_identifier)
-{
-	char str[IDENTIFIER_SIZE + 1];
-	char *str_new = str;
-	strncpy(str_new, str_with_identifier, IDENTIFIER_SIZE);
-	str[IDENTIFIER_SIZE + 1] = '\0';
-	return str_new;
+	return TRUE;
 }
 
 int extractReading(char * str_with_reading)
@@ -54,10 +60,11 @@ int extractReading(char * str_with_reading)
 		return BAD_READING;
 	}
 
-	char reading[TEMP_LEN + 1];
+	char reading[TEMPERATURE_LEN + 1];
 	char *reading_ptr = reading;
-	strncpy(reading_ptr, str_with_reading + (pos + 2), TEMP_LEN);
-	reading[TEMP_LEN + 1] = '\0';
+
+	strncpy(reading_ptr, str_with_reading + (pos + 2), TEMPERATURE_LEN);
+	reading[TEMPERATURE_LEN + 1] = '\0';
 
 	return atoi(reading);
 }
@@ -93,6 +100,7 @@ reading_t * thermRead(char *location)
 	   with an identifier and a reading in it */
 	char success_line[MAX_BUFLEN];
 	fgets(success_line, sizeof(success_line), fp);
+	removeNewline(success_line);
 
 	if (strpos(success_line, "YES") == NOT_FOUND) {
 		/* intentionally out-of-range value for the sensor */
@@ -100,11 +108,9 @@ reading_t * thermRead(char *location)
 	} else {
 		char temperature_line[MAX_BUFLEN];
 		fgets(temperature_line, sizeof(temperature_line), fp);
-		reading->temperature = extractReading(removeNewline(temperature_line));
+		removeNewline(temperature_line);
+		reading->temperature = extractReading(temperature_line);
 	}
-
-	/* read temp and identifier from file innem */
-	reading->identifier = extractIdentifier(removeNewline(success_line));
 
 	fclose(fp);
 	return reading;

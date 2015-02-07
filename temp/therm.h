@@ -2,7 +2,6 @@
 #define H_THERM
 
 typedef struct {
-	char *identifier; /* hex representation of the reading */
 	int temperature; /* the temperature represented as an int */
 } reading_t;
 
