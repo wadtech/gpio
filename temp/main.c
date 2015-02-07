@@ -49,7 +49,7 @@ void cleanUpAndExit()
 /* Only really have this because signal needs a function to call */
 void cleanUpAndError()
 {
-	printf("Exiting...\n");
+	cleanUp();
 	exit(1);
 }
 
