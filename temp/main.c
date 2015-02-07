@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <time.h>
 #include <wiringPi.h>
 
 #include "therm.h"
@@ -12,7 +13,7 @@
 #define LED_2 2
 
 #define THERM_LOCATION "/sys/bus/w1/devices/28-00141186abff/w1_slave"
-#define OUTPUT_FILE "./readings.txt"
+#define OUTPUT_FILE "./readings.csv"
 
 #define POLL_DELAY 30000 /* 30 seconds */
 
@@ -55,20 +56,22 @@ void cleanUpAndError()
 
 int writeResult(char *filepath, reading_t *reading)
 {
+	int ret = TRUE;
+
 	FILE *of;
 	of = fopen(filepath, "a");
 	if (of == NULL) {
 		return FALSE;
 	}
 
-	int written = fprintf(of, "%2.0f\n", thermCelcius(reading));
+	int written = fprintf(of, "%u,%2.0f\n", (unsigned)time(NULL),
+											 thermCelcius(reading));
 	if (written == 0) {
-		fclose(of);
-		return FALSE;
+		ret = FALSE;
 	}
 
 	fclose(of);
-	return TRUE;
+	return ret;
 }
 
 int main(void)
