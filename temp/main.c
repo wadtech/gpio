@@ -32,6 +32,7 @@ int setUp()
 
 void cleanUp()
 {
+	printf("Exiting...\n");
 	digitalWrite(LED_1, LOW);
 	digitalWrite(LED_2, LOW);
 }
@@ -39,9 +40,15 @@ void cleanUp()
 /* Only really have this because signal needs a function to call */
 void cleanUpAndExit()
 {
-	printf("Exiting...\n");
 	cleanUp();
 	exit(0);
+}
+
+/* Only really have this because signal needs a function to call */
+void cleanUpAndError()
+{
+	printf("Exiting...\n");
+	exit(1);
 }
 
 int writeResult(char *filepath, reading_t *reading)
@@ -71,7 +78,7 @@ int main(void)
 
 	/* Handles ctrl+c so we get cleanup, and importantly switch off the
 	   "running" LED */
-    signal(SIGINT, cleanUpAndExit);
+    signal(SIGINT, cleanUpAndError);
 
 	/* light this LED to show the program is running. */
 	digitalWrite(LED_1, HIGH);
@@ -85,8 +92,7 @@ int main(void)
 		if (reading == NULL) {
 			/* what a state, failed malloc or something probably */
 			printf("Failed to read from the sensor\n");
-			cleanUp();
-			return 1;
+			cleanUpAndExit();
 		}
 
 		/* probably write to a file or something here... */
@@ -98,5 +104,4 @@ int main(void)
 	}
 
 	cleanUpAndExit();
-	return 0;
 }
