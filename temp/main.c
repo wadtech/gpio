@@ -47,7 +47,8 @@ int main(void)
 	float degrees_f;
 
 	for(;;) {
-		digitalWrite(LED_2, HIGH); // flash the working LED to show that we're taking a temp and doing something with it
+		// flash the working LED to show that we're taking a temp and doing something with it
+		digitalWrite(LED_2, HIGH);
 
 		reading_t *raw = thermRead(THERM_LOCATION);
 		if (raw == NULL) {
