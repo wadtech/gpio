@@ -12,6 +12,7 @@
 #define LED_2 2
 
 #define THERM_LOCATION "/sys/bus/w1/devices/28-00141186abff/w1_slave"
+#define OUTPUT_FILE "./readings.txt"
 
 int setUp()
 {
@@ -43,6 +44,24 @@ void cleanUpAndExit()
 	exit(0);
 }
 
+int writeResult(char *filepath, reading_t *reading)
+{
+	FILE *of;
+	of = fopen(filepath, "a");
+	if (of == NULL) {
+		return FALSE;
+	}
+
+	int written = fprintf(of, "%2.0f\n", thermCelcius(reading));
+	if (written == 0) {
+		fclose(of);
+		return FALSE;
+	}
+
+	fclose(of);
+	return TRUE;
+}
+
 int main(void)
 {
 	if (setUp() == FALSE) {
@@ -57,25 +76,22 @@ int main(void)
 	/* light this LED to show the program is running. */
 	digitalWrite(LED_1, HIGH);
 
-	float degrees_c;
-
 	for(;;) {
 		/* flash the working LED to show that we're
 		   taking a temp and doing some work */
 		digitalWrite(LED_2, HIGH);
 
-		reading_t *raw = thermRead(THERM_LOCATION);
-		if (raw == NULL) {
+		reading_t *reading = thermRead(THERM_LOCATION);
+		if (reading == NULL) {
 			/* what a state, failed malloc or something probably */
 			printf("Failed to read from the sensor\n");
 			cleanUp();
 			return 1;
 		}
 
-		degrees_c = thermCelcius(raw);
-
 		/* probably write to a file or something here... */
-		printf("%2.0fC\n", degrees_c);
+		writeResult(OUTPUT_FILE, reading);
+		printf("%2.0f°C\n", thermCelcius(reading));
 
 		digitalWrite(LED_2, LOW);
 		delay(10000);
