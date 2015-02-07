@@ -14,6 +14,8 @@
 #define THERM_LOCATION "/sys/bus/w1/devices/28-00141186abff/w1_slave"
 #define OUTPUT_FILE "./readings.txt"
 
+#define POLL_DELAY 30000 /* 30 seconds */
+
 int setUp()
 {
 	if (wiringPiSetup() == -1) {
@@ -100,7 +102,10 @@ int main(void)
 		printf("%2.0f°C\n", thermCelcius(reading));
 
 		digitalWrite(LED_2, LOW);
-		delay(10000);
+
+		/* We're done with the reading struct, so free it up. */
+		free(reading);
+		delay(POLL_DELAY);
 	}
 
 	cleanUpAndExit();
