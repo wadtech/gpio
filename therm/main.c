@@ -83,7 +83,7 @@ int main(void)
 
 	/* Handles ctrl+c so we get cleanup, and importantly switch off the
 	   "running" LED */
-    signal(SIGINT, cleanUpAndError);
+	signal(SIGINT, cleanUpAndError);
 
 	/* light this LED to show the program is running. */
 	digitalWrite(LED_1, HIGH);
